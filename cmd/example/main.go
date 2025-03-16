@@ -3,26 +3,65 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
+	"os"
+	"strings"
 
 	lab2 "github.com/yur-ochka/lab-2-architecture"
 )
 
 var (
-	inputExpression = flag.String("e", "", "Expression to compute")
-	// TODO: Add other flags support for input and output configuration.
+	inputExpression = flag.String("e", "", "Expression to compute (e.g., \"3 4 +\")")
+	fileInput       = flag.String("f", "", "File containing the expression")    
+	fileOutput      = flag.String("o", "", "File to write the result to (optional)")   
 )
 
 func main() {
 	flag.Parse()
 
-	// TODO: Change this to accept input from the command line arguments as described in the task and
-	//       output the results using the ComputeHandler instance.
-	//       handler := &lab2.ComputeHandler{
-	//           Input: {construct io.Reader according the command line parameters},
-	//           Output: {construct io.Writer according the command line parameters},
-	//       }
-	//       err := handler.Compute()
+	if *inputExpression != "" && *fileInput != "" {
+		fmt.Fprintln(os.Stderr, "Error: Both -e and -f options provided. Use only one.")
+		os.Exit(1)
+	}
 
-	res, _ := lab2.PostfixToInfix("+ 2 2")
-	fmt.Println(res)
+	var inputReader io.Reader
+	if *fileInput != "" {
+		inputFile, err := os.Open(*fileInput)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error opening input file: %v\n", err)
+			os.Exit(1)
+		}
+		defer inputFile.Close()
+		inputReader = inputFile
+	} else if *inputExpression != "" { 
+		inputReader = strings.NewReader(*inputExpression) 
+	} else {
+		fmt.Fprintln(os.Stderr, "Error: No expression provided. Use -e or -f option.")
+		os.Exit(1)
+	}
+
+	var outputWriter io.Writer
+	if *fileOutput != "" {
+		outputFile, err := os.Create(*fileOutput)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error creating output file: %v\n", err)
+			os.Exit(1)
+		}
+		defer outputFile.Close()
+		outputWriter = outputFile
+	} else {
+		outputWriter = os.Stdout
+	}
+
+	handler := lab2.ComputeHandler{
+		Input:     inputReader,
+		Output:    outputWriter,
+		Converter: lab2.PostfixToInfix,
+	}
+
+	err := handler.Compute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error processing expression: %v\n", err)
+		os.Exit(1)
+	}
 }
