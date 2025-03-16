@@ -16,6 +16,8 @@ func TestPostfixToInfix(t *testing.T) {
     {"3 4 +", "(3 + 4)", false},
     {"5 1 2 + 4 * + 3 -", "((5 + ((1 + 2) * 4)) - 3)", false},
     {"2 3 4 * +", "(2 + (3 * 4))", false},
+    {"2 3 4 ^ *", "(2 * (3 ^ 4))", false},
+    {"3 2 ^ 4 + 5 *", "(((3 ^ 2) + 4) * 5)", false},
     {"10 6 9 3 / * +", "(10 + (6 * (9 / 3)))", false},
     {"", "", true},                   
     {"3 +", "", true},                
@@ -42,5 +44,5 @@ func ExamplePostfixToInfix() {
     fmt.Println(result)
   }
   // Output:
-  // (5 + (4 - 2) * (3 ^ 2))
+  // (((4 - 2) * (3 ^ 2)) + 5)
 }
