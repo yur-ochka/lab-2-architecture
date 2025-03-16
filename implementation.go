@@ -12,7 +12,7 @@ func PostfixToInfix(input string) (string, error) {
     return "", fmt.Errorf("input string is empty")
   }
 
-  operators := "+-*/^"
+  operators := "-*/"
   stack := []string{}
   tokens := strings.Fields(input)
 
