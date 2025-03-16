@@ -3,7 +3,7 @@ default: out/example
 clean:
 	rm -rf out
 
-test: *.go
+test: 
 	go test ./...
 
 out/example: implementation.go cmd/example/main.go
